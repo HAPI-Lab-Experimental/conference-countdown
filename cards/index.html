@@ -144,16 +144,20 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 
 .count{
   flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:flex-start;
-  gap:clamp(8px, 5cqi, 28px); padding-block:6px;
+  gap:clamp(8px, 4cqi, 24px); padding-block:6px; flex-wrap:nowrap; overflow:hidden;
   font-variant-numeric:tabular-nums;
 }
-.unit{display:flex; flex-direction:column; align-items:flex-start; min-width:0}
+.unit{display:flex; flex-direction:column; align-items:flex-start; flex:0 0 auto}
+/* --fit scales the numerals down: .wide when days reach three digits, .tight when a measurement still overflows */
+.card{--fit:1}
+.card.wide{--fit:.8}
+.card.tight{--fit:.62}
 .unit .v{
   font-family:var(--display); font-weight:600; line-height:.9; color:var(--ink);
-  font-size:clamp(34px, min(24cqi, 26cqb), 120px); letter-spacing:-.01em;
+  font-size:calc(clamp(30px, min(21cqi, 26cqb), 112px) * var(--fit)); letter-spacing:-.01em;
 }
 .unit .l{font-size:clamp(10px, 3.2cqi, 12px); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:6px; font-weight:500}
-.unit.sec .v{font-size:clamp(16px, min(8cqi, 10cqb), 30px); color:var(--muted); font-weight:500; align-self:flex-start}
+.unit.sec .v{font-size:calc(clamp(15px, min(7cqi, 10cqb), 28px) * var(--fit)); color:var(--muted); font-weight:500; align-self:flex-start}
 .unit.sec .l{margin-top:4px}
 .card[data-heat="soon"] .unit.days .v, .card[data-heat="soon"] .unit.hours .v{color:var(--soon)}
 .card[data-heat="urgent"] .unit .v{color:var(--urgent)}
@@ -182,7 +186,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   main{padding-block:var(--gap)}
   .row{height:auto; grid-template-columns:1fr !important; grid-auto-rows:auto}
   .card{height:230px}
-  .unit .v{font-size:clamp(40px, 16cqi, 72px)}
+  .unit .v{font-size:calc(clamp(36px, 15cqi, 72px) * var(--fit))}
 }
 @media (prefers-reduced-motion: reduce){
   .card{transition:none}
@@ -425,7 +429,12 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     var mins = Math.floor(diff % 3600000 / 60000);
     var secs = Math.floor(diff % 60000 / 1000);
     var u = el._u;
-    if (u.d.textContent !== String(days)) u.d.textContent = days;
+    if (u.d.textContent !== String(days)) {
+      var digitsChanged = u.d.textContent.length !== String(days).length;
+      u.d.textContent = days;
+      el.classList.toggle('wide', days >= 100);
+      if (digitsChanged) fit(el);
+    }
     var hh = pad(hours), mm = pad(mins), ss = pad(secs);
     if (u.h.textContent !== hh) u.h.textContent = hh;
     if (u.m.textContent !== mm) u.m.textContent = mm;
@@ -433,6 +442,18 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     var heat = diff < 86400000 ? 'urgent' : diff < 7 * 86400000 ? 'soon' : 'none';
     if (el.dataset.heat !== heat) el.dataset.heat = heat;
   }
+
+  /* ---- make sure the three groups fit the card width ---- */
+  function fit(el){
+    var c = el._count || (el._count = el.querySelector('.count'));
+    el.classList.remove('tight');
+    if (c.scrollWidth > c.clientWidth + 1) el.classList.add('tight');
+  }
+  function refit(){
+    Array.prototype.forEach.call(row.children, function(c){ if (c.classList.contains('card') && !c.classList.contains('leaving')) fit(c); });
+  }
+  window.addEventListener('resize', refit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
 
   /* ---- reconcile visible set every tick (leave / FLIP / enter) ---- */
   var LEAVE_MS = 560;
@@ -493,6 +514,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
           entering.forEach(function(el){ el.classList.remove('entering'); });
         });
       }
+      refit();
       foot.textContent = want.length + ' of ' + upcoming.length + ' upcoming deadlines' + (tags.size ? ' in ' + tagsStr().replace(/,/g, ', ') : '') + ' · times shown in your local timezone (' + resolvedTZ + ') · dates marked estimated are inferred from the previous edition';
     }
 
