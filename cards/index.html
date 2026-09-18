@@ -214,7 +214,7 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 
 .when{border-top:1px solid var(--rule); padding-top:10px; display:flex; flex-direction:column; gap:2px}
 .when .local{font-weight:600; font-size:clamp(12.5px, 4.6cqi, 15px); font-variant-numeric:tabular-nums}
-.when .cfp{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
+.when .cfp{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
 .empty{grid-column:1/-1; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:15px; text-align:center; padding:24px}
 
@@ -440,9 +440,20 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     return part(parts,'weekday') + ' ' + part(parts,'day') + ' ' + part(parts,'month') + ' ' + part(parts,'year') +
            ', ' + part(parts,'hour') + ':' + part(parts,'minute') + ' ' + part(parts,'timeZoneName');
   }
+  /* The CFP's own date and time, formatted in the CFP zone (never the viewer's), so it can differ from the local line above it. */
+  var CFP_ZONES = { AoE: 'Etc/GMT+12', UTC: 'UTC', PT: 'America/Los_Angeles', ET: 'America/New_York', CET: 'Europe/Paris' };
+  var CFP_LONG = { AoE: 'Anywhere on Earth (UTC\u221212)', UTC: 'Coordinated Universal Time', PT: 'Pacific Time (Los Angeles)' };
   function cfpTime(d){
-    var m = /T(\d{2}):(\d{2})/.exec(d.deadline);
-    return (m ? m[1] + ':' + m[2] : '') + ' ' + d.timezone;
+    var parts = null;
+    try {
+      if (CFP_ZONES[d.timezone]) parts = new Intl.DateTimeFormat(undefined, { timeZone: CFP_ZONES[d.timezone], weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).formatToParts(new Date(d.ts));
+    } catch(e){ parts = null; }
+    if (!parts) { // fallback: the ISO string already carries the CFP wall-clock time
+      var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(d.deadline);
+      var wall = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+      parts = new Intl.DateTimeFormat(undefined, { timeZone: 'UTC', weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).formatToParts(wall);
+    }
+    return part(parts,'weekday') + ' ' + part(parts,'day') + ' ' + part(parts,'month') + ' ' + part(parts,'year') + ', ' + part(parts,'hour') + ':' + part(parts,'minute') + ' ' + d.timezone;
   }
   function tzLabel(){
     var abbr = part(dtf.formatToParts(new Date(now())), 'timeZoneName');
@@ -477,7 +488,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
       '</div></div>' +
       '<div class="when">' +
         '<span class="local">' + esc(fmtLocal(d.ts)) + '</span>' +
-        '<span class="cfp">' + esc(cfpTime(d)) + ' · ' + esc(d.timezone === 'AoE' ? 'Anywhere on Earth (UTC−12)' : 'CFP timezone') + '</span>' +
+        '<span class="cfp" title="' + esc('Deadline in the CFP timezone: ' + (CFP_LONG[d.timezone] || d.timezone)) + '">' + esc(cfpTime(d)) + (d.timezone === 'AoE' ? ' · UTC\u221212' : '') + '</span>' +
       '</div>';
     el._u = { d: el.querySelector('[data-u="d"]'), h: el.querySelector('[data-u="h"]'), m: el.querySelector('[data-u="m"]'), s: el.querySelector('[data-u="s"]') };
     el._data = d;
