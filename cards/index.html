@@ -58,8 +58,8 @@ body{
 .top .sub{color:var(--muted); font-size:12.5px; margin-top:6px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center}
 .top .sub .dot::before{content:"·"; margin-right:10px; color:var(--rule-strong)}
 .chip{
-  display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px;
-  border:1px solid var(--soon); color:var(--soon); background:var(--soon-bg); font-size:11.5px; font-weight:500;
+  display:inline-flex; align-items:center; gap:6px; padding:1px 8px; border-radius:999px; line-height:1.2;
+  border:1px solid var(--soon); color:var(--soon); background:var(--soon-bg); font-size:11px; font-weight:500; /* fits inside the 17.5px subtitle line so the header never grows */
 }
 .chip .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
@@ -671,7 +671,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     qFig.classList.remove('nofit');
     if (!qVisible()) { qIdx = i; return; }
     var base = Math.min(17, Math.max(13, window.innerWidth * 0.009)) * (FACE_SCALE[q.f] || 1);
-    var fs = base;
+    var fs = Math.max(13, base); // never below the 13px floor, whatever the face scale
     qText.style.fontSize = fs.toFixed(1) + 'px';
     while (qOverflows() && fs >= 13.5) { fs -= 0.5; qText.style.fontSize = fs.toFixed(1) + 'px'; } // floor 13px
     if (qOverflows() && (tries || 0) < QUOTES.length) return renderQuote((i + 1) % QUOTES.length, (tries || 0) + 1, animate);
