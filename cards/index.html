@@ -183,10 +183,11 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 .count{
   flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:flex-start;
   /* the numerals may shrink (see fit()) so the block never spills into its neighbours */
-  gap:clamp(8px, 4cqi, 24px); padding-block:calc(6px * var(--vfit, 1)); flex-wrap:nowrap; overflow:hidden;
+  padding-block:calc(6px * var(--vfit, 1)); overflow:hidden;
   font-variant-numeric:tabular-nums;
 }
-.unit{display:flex; flex-direction:column; align-items:flex-start; flex:0 0 auto}
+.count .units{display:flex; align-items:flex-end; gap:clamp(8px, 4cqi, 24px); flex-wrap:nowrap; max-width:100%}
+.unit{display:flex; flex-direction:column; align-items:center; text-align:center; flex:0 0 auto}
 /* --fit scales the numerals down: .wide when days reach three digits, .tight when a measurement still overflows */
 .card{--fit:1}
 .card.wide{--fit:.8}
@@ -196,8 +197,8 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
   font-size:calc(clamp(30px, min(21cqi, 20cqb), 112px) * var(--fit) * var(--vfit, 1)); letter-spacing:-.01em;
 }
 .unit .l{font-size:calc(clamp(10px, 3.2cqi, 12px) * var(--vfit, 1)); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:calc(6px * var(--vfit, 1)); font-weight:500}
-.unit.sec .v{font-size:calc(clamp(15px, min(7cqi, 9cqb), 28px) * var(--fit) * var(--vfit, 1)); color:var(--muted); font-weight:500; align-self:flex-start}
-.unit.sec .l{margin-top:4px}
+.unit.sec .v{font-size:calc(clamp(15px, min(7cqi, 9cqb), 28px) * var(--fit) * var(--vfit, 1)); color:var(--muted); font-weight:500}
+.unit.sec .l{margin-top:calc(6px * var(--vfit, 1))}
 .card[data-heat="soon"] .unit.days .v, .card[data-heat="soon"] .unit.hours .v{color:var(--soon)}
 .card[data-heat="urgent"] .unit .v{color:var(--urgent)}
 
@@ -458,12 +459,12 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
       '</div>' +
       '<h2 class="name">' + esc(d.name) + '</h2>' +
       '<div class="kind"><b>' + esc(kind) + '</b>' + (d.location && d.location !== 'TBA' ? ' · ' + esc(d.location) : '') + '</div>' +
-      '<div class="count">' +
+      '<div class="count"><div class="units">' +
         '<div class="unit days"><span class="v" data-u="d">--</span><span class="l">days</span></div>' +
         '<div class="unit hours"><span class="v" data-u="h">--</span><span class="l">hours</span></div>' +
         '<div class="unit mins"><span class="v" data-u="m">--</span><span class="l">min</span></div>' +
         '<div class="unit sec"><span class="v" data-u="s">--</span><span class="l">sec</span></div>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="when">' +
         '<span class="local">' + esc(fmtLocal(d.ts)) + '</span>' +
         '<span class="cfp">' + esc(cfpTime(d)) + ' · ' + esc(d.timezone === 'AoE' ? 'Anywhere on Earth (UTC−12)' : 'CFP timezone') + '</span>' +
@@ -497,7 +498,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   function fit(el){
     var c = el._count || (el._count = el.querySelector('.count'));
     el.classList.remove('tight');
-    if (c.scrollWidth > c.clientWidth + 1) el.classList.add('tight');
+    if (c.firstElementChild.scrollWidth > c.clientWidth + 1) el.classList.add('tight');
     // vertical: on short cards step the numerals down until the card's content fits its box
     el.style.removeProperty('--vfit');
     var v = 1;
