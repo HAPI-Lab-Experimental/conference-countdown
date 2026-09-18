@@ -1,0 +1,456 @@
+<title>Conference Deadlines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#EDEFF2; --surface:#FFFFFF; --ink:#151A21; --muted:#5A6473; --rule:#D5DAE1; --rule-strong:#B8C0CB;
+  --soon:#B4690E; --soon-bg:#FFF4E3; --urgent:#C0331E; --urgent-bg:#FDECE8;
+  --focus:#1D4ED8;
+  --area-rl:#6D28D9; --area-robotics:#0F766E; --area-ml:#1D4ED8; --area-ai:#9A6700; --area-vision:#B3441B; --area-nlp:#A21CAF;
+  --shadow:0 1px 2px rgba(21,26,33,.06), 0 8px 24px -12px rgba(21,26,33,.18);
+  --gap:14px;
+  --display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#0E1116; --surface:#171B22; --ink:#EDEFF2; --muted:#9AA3AF; --rule:#2A3039; --rule-strong:#3B434F;
+    --soon:#E9A23B; --soon-bg:#2A2114; --urgent:#F0705A; --urgent-bg:#2E1914;
+    --focus:#8AB4FF;
+    --area-rl:#B79CFF; --area-robotics:#5EDAD0; --area-ml:#8AB4FF; --area-ai:#E8C46A; --area-vision:#F5A07C; --area-nlp:#F0A0F5;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#0E1116; --surface:#171B22; --ink:#EDEFF2; --muted:#9AA3AF; --rule:#2A3039; --rule-strong:#3B434F;
+  --soon:#E9A23B; --soon-bg:#2A2114; --urgent:#F0705A; --urgent-bg:#2E1914;
+  --focus:#8AB4FF;
+  --area-rl:#B79CFF; --area-robotics:#5EDAD0; --area-ml:#8AB4FF; --area-ai:#E8C46A; --area-vision:#F5A07C; --area-nlp:#F0A0F5;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--body); font-size:14px; line-height:1.4;
+  display:flex; flex-direction:column;
+  padding-block:12px; padding-inline:16px;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
+
+/* Header */
+.top{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+  padding-bottom:12px; border-bottom:1px solid var(--rule); flex:none;
+}
+.top h1{
+  font-family:var(--display); font-weight:700; font-size:28px; line-height:1; margin:0;
+  letter-spacing:.01em; text-transform:uppercase; text-wrap:balance;
+}
+.top .sub{color:var(--muted); font-size:12.5px; margin-top:6px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center}
+.top .sub .dot::before{content:"·"; margin-right:10px; color:var(--rule-strong)}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px;
+  border:1px solid var(--soon); color:var(--soon); background:var(--soon-bg); font-size:11.5px; font-weight:500;
+}
+.chip .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.controls{display:flex; align-items:center; gap:8px; flex:none}
+.controls label{font-size:12.5px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.06em}
+.controls select{
+  font:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface);
+  border:1px solid var(--rule-strong); border-radius:6px; padding:5px 28px 5px 10px; cursor:pointer;
+  appearance:none; -webkit-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size:5px 5px; background-repeat:no-repeat;
+}
+
+/* Row of cards */
+main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10px}
+.row{
+  height:100%; position:relative;
+  display:grid; gap:var(--gap);
+  grid-template-columns:repeat(var(--cols,5), minmax(0,1fr));
+  grid-auto-rows:minmax(0,1fr);
+}
+.card{
+  --accent:var(--rule);
+  container-type:size;
+  position:relative; min-width:0; min-height:0;
+  background:var(--surface); border:1px solid var(--accent); border-radius:10px;
+  box-shadow:var(--shadow);
+  display:flex; flex-direction:column; padding:14px 16px 14px; gap:6px;
+  overflow:hidden;
+  transition:transform .55s cubic-bezier(.2,.7,.2,1), opacity .5s ease, border-color .3s ease;
+}
+.card[data-heat="soon"]{--accent:var(--soon); border-width:1.5px}
+.card[data-heat="urgent"]{--accent:var(--urgent); border-width:2px; box-shadow:var(--shadow), 0 0 0 4px var(--urgent-bg)}
+.card.entering{opacity:0; transform:translateX(48px)}
+.card.leaving{opacity:0; transform:translateX(-48px); pointer-events:none}
+
+.card .meta{display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-height:22px}
+.pill{
+  display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px;
+  font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; line-height:1.4;
+  color:var(--area); background:color-mix(in srgb, var(--area) 13%, transparent);
+}
+.pill[data-area="RL"]{--area:var(--area-rl)} .pill[data-area="Robotics"]{--area:var(--area-robotics)}
+.pill[data-area="ML"]{--area:var(--area-ml)} .pill[data-area="AI"]{--area:var(--area-ai)}
+.pill[data-area="Vision"]{--area:var(--area-vision)} .pill[data-area="NLP"]{--area:var(--area-nlp)}
+.est{
+  display:inline-flex; align-items:center; padding:1px 7px; border-radius:999px; border:1px dashed var(--rule-strong);
+  color:var(--muted); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:500;
+}
+.card .home{
+  margin-left:auto; color:var(--muted); display:inline-flex; width:26px; height:26px; align-items:center; justify-content:center;
+  border-radius:6px; text-decoration:none;
+}
+.card .home:hover{color:var(--ink); background:color-mix(in srgb, var(--ink) 8%, transparent)}
+.card .home svg{width:15px;height:15px;display:block}
+
+.card .name{
+  font-family:var(--display); font-weight:700; line-height:.95; margin:4px 0 0;
+  font-size:clamp(22px, 13cqi, 40px); text-wrap:balance; letter-spacing:.005em;
+}
+.card .kind{color:var(--muted); font-size:clamp(12px, 4.5cqi, 14px); font-weight:500}
+.card .kind b{color:var(--ink); font-weight:600}
+.card .loc{color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+.count{
+  flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:flex-start;
+  gap:clamp(8px, 5cqi, 28px); padding-block:6px;
+  font-variant-numeric:tabular-nums;
+}
+.unit{display:flex; flex-direction:column; align-items:flex-start; min-width:0}
+.unit .v{
+  font-family:var(--display); font-weight:600; line-height:.9; color:var(--ink);
+  font-size:clamp(34px, min(24cqi, 26cqb), 120px); letter-spacing:-.01em;
+}
+.unit .l{font-size:clamp(10px, 3.2cqi, 12px); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:6px; font-weight:500}
+.unit.sec .v{font-size:clamp(16px, min(8cqi, 10cqb), 30px); color:var(--muted); font-weight:500; align-self:flex-start}
+.unit.sec .l{margin-top:4px}
+.card[data-heat="soon"] .unit.days .v, .card[data-heat="soon"] .unit.hours .v{color:var(--soon)}
+.card[data-heat="urgent"] .unit .v{color:var(--urgent)}
+
+.when{border-top:1px solid var(--rule); padding-top:10px; display:flex; flex-direction:column; gap:2px}
+.when .local{font-weight:600; font-size:clamp(12.5px, 4.6cqi, 15px); font-variant-numeric:tabular-nums}
+.when .cfp{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
+
+.empty{grid-column:1/-1; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:15px; text-align:center; padding:24px}
+
+footer{flex:none; color:var(--muted); font-size:12px; padding-top:6px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); border-bottom-width:2px; border-radius:4px; padding:0 5px; color:var(--ink)}
+
+.toast{
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--ink); color:var(--ground);
+  padding:8px 14px; border-radius:8px; font-size:13px; box-shadow:var(--shadow); z-index:10; pointer-events:none;
+  opacity:0; transition:opacity .3s;
+}
+.toast.show{opacity:1}
+
+/* Narrow: stack and scroll */
+@media (max-width: 699px){
+  html,body{height:auto}
+  body{overflow:auto; min-height:100%}
+  .top{flex-direction:column; align-items:flex-start}
+  main{padding-block:var(--gap)}
+  .row{height:auto; grid-template-columns:1fr !important; grid-auto-rows:auto}
+  .card{height:230px}
+  .unit .v{font-size:clamp(40px, 16cqi, 72px)}
+}
+@media (prefers-reduced-motion: reduce){
+  .card{transition:none}
+  .card.entering{opacity:1; transform:none}
+  .chip .pulse{animation:none}
+}
+</style>
+
+<header class="top">
+  <div>
+    <h1>Conference Deadlines</h1>
+    <div class="sub">
+      <span id="tz">Your timezone: detecting…</span>
+      <span class="dot">updated 2026-09-18</span>
+      <span id="clock-chip" class="chip" hidden><span class="pulse"></span><span id="clock-chip-text">Preview clock</span></span>
+    </div>
+  </div>
+  <div class="controls">
+    <label for="showN">Show</label>
+    <select id="showN" aria-label="Number of deadlines to show">
+      <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <section class="row" id="row" aria-live="off" aria-label="Upcoming deadlines, live countdown"></section>
+</main>
+
+<footer>
+  <span id="foot"></span>
+  <span>press <kbd>d</kbd> to preview the next expiry</span>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script id="deadlines" type="application/json">
+[
+  {"id": "iclr27-abs", "name": "ICLR 2027", "type": "Abstract", "area": "ML", "deadline": "2026-09-18T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://iclr.cc/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "hri27-full", "name": "HRI 2027", "type": "Full paper", "area": "Robotics", "deadline": "2026-09-18T23:59:00-12:00", "timezone": "AoE", "location": "Santa Clara, CA, USA", "url": "https://humanrobotinteraction.org/2027/", "status": "verified", "source": "humanrobotinteraction.org (web search)"},
+  {"id": "iclr27-full", "name": "ICLR 2027", "type": "Full paper", "area": "ML", "deadline": "2026-09-25T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://iclr.cc/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "aistats27-abs", "name": "AISTATS 2027", "type": "Abstract", "area": "ML", "deadline": "2026-09-29T23:59:59-12:00", "timezone": "AoE", "location": "Montréal, Canada", "url": "https://virtual.aistats.org/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "aamas27-abs", "name": "AAMAS 2027", "type": "Abstract", "area": "AI", "deadline": "2026-10-02T11:59:00+00:00", "timezone": "UTC", "location": "Hanoi, Vietnam", "url": "https://openreview.net/group?id=ifaamas.org/AAMAS/2027/Conference", "status": "verified", "source": "ccfddl"},
+  {"id": "aistats27-full", "name": "AISTATS 2027", "type": "Full paper", "area": "ML", "deadline": "2026-10-06T23:59:59-12:00", "timezone": "AoE", "location": "Montréal, Canada", "url": "https://virtual.aistats.org/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "aamas27-full", "name": "AAMAS 2027", "type": "Full paper", "area": "AI", "deadline": "2026-10-09T11:59:00+00:00", "timezone": "UTC", "location": "Hanoi, Vietnam", "url": "https://openreview.net/group?id=ifaamas.org/AAMAS/2027/Conference", "status": "verified", "source": "ccfddl"},
+  {"id": "alt27", "name": "ALT 2027", "type": "Deadline", "area": "ML", "deadline": "2026-10-12T23:59:59-12:00", "timezone": "AoE", "location": "Leiden, Netherlands", "url": "https://algorithmiclearningtheory.org/alt2027/", "status": "verified", "source": "ccfddl"},
+  {"id": "naacl27", "name": "NAACL 2027", "type": "Deadline", "area": "NLP", "deadline": "2026-10-12T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://2027.naacl.org/", "status": "verified", "source": "ccfddl (ARR submission)"},
+  {"id": "cvpr27-abs", "name": "CVPR 2027", "type": "Abstract", "area": "Vision", "deadline": "2026-11-10T23:59:00-12:00", "timezone": "AoE", "location": "Seattle, WA, USA", "url": "https://cvpr.thecvf.com/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "cvpr27-full", "name": "CVPR 2027", "type": "Full paper", "area": "Vision", "deadline": "2026-11-16T23:59:00-12:00", "timezone": "AoE", "location": "Seattle, WA, USA", "url": "https://cvpr.thecvf.com/Conferences/2027", "status": "verified", "source": "ccfddl"},
+  {"id": "l4dc27", "name": "L4DC 2027", "type": "Deadline", "area": "Robotics", "deadline": "2026-11-20T23:59:00-12:00", "timezone": "AoE", "location": "Zürich, Switzerland", "url": "https://l4dc2027.control.ee.ethz.ch/", "status": "estimated", "source": "estimated from previous editions"},
+  {"id": "icaps27-abs", "name": "ICAPS 2027", "type": "Abstract", "area": "AI", "deadline": "2026-12-07T23:59:59-12:00", "timezone": "AoE", "location": "Columbia, SC, USA", "url": "https://icaps27.icaps-conference.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "icaps27-full", "name": "ICAPS 2027", "type": "Full paper", "area": "AI", "deadline": "2026-12-13T23:59:59-12:00", "timezone": "AoE", "location": "Columbia, SC, USA", "url": "https://icaps27.icaps-conference.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "ijcai27-abs", "name": "IJCAI 2027", "type": "Abstract", "area": "AI", "deadline": "2027-01-11T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://ijcai.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "icml27-abs", "name": "ICML 2027", "type": "Abstract", "area": "ML", "deadline": "2027-01-16T23:59:59-12:00", "timezone": "AoE", "location": "South America (city TBA)", "url": "https://icml.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "ijcai27-full", "name": "IJCAI 2027", "type": "Full paper", "area": "AI", "deadline": "2027-01-18T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://ijcai.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "icml27-full", "name": "ICML 2027", "type": "Full paper", "area": "ML", "deadline": "2027-01-22T23:59:59-12:00", "timezone": "AoE", "location": "South America (city TBA)", "url": "https://icml.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "rss27-abs", "name": "RSS 2027", "type": "Abstract", "area": "Robotics", "deadline": "2027-01-22T23:59:00-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://roboticsconference.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "rss27-full", "name": "RSS 2027", "type": "Full paper", "area": "Robotics", "deadline": "2027-01-29T23:59:00-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://roboticsconference.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "colt27", "name": "COLT 2027", "type": "Deadline", "area": "ML", "deadline": "2027-02-03T23:59:00-12:00", "timezone": "AoE", "location": "Tokyo, Japan", "url": "https://learningtheory.org/colt2027/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "kdd27-c2", "name": "KDD 2027 · Cycle 2", "type": "Full paper", "area": "ML", "deadline": "2027-02-07T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://kdd2027.kdd.org/", "status": "estimated", "source": "estimated from 2026 edition (cycle 1 closed 2026-07-19)"},
+  {"id": "uai27", "name": "UAI 2027", "type": "Deadline", "area": "ML", "deadline": "2027-02-24T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.auai.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "rlc27-abs", "name": "RLC 2027", "type": "Abstract", "area": "RL", "deadline": "2027-03-01T23:59:00-12:00", "timezone": "AoE", "location": "Providence, RI, USA & Odense, Denmark", "url": "https://rl-conference.cc/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "iros27", "name": "IROS 2027", "type": "Deadline", "area": "Robotics", "deadline": "2027-03-01T23:59:59-08:00", "timezone": "PT", "location": "Florence, Italy", "url": "https://www.ieee-ras.org/conferences-workshops/fully-sponsored/iros", "status": "verified", "source": "ieee-ras.org (web search)"},
+  {"id": "iccv27-abs", "name": "ICCV 2027", "type": "Abstract", "area": "Vision", "deadline": "2027-03-03T23:59:00-08:00", "timezone": "PT", "location": "TBA", "url": "https://iccv.thecvf.com/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "rlc27-full", "name": "RLC 2027", "type": "Full paper", "area": "RL", "deadline": "2027-03-05T23:59:00-12:00", "timezone": "AoE", "location": "Providence, RI, USA & Odense, Denmark", "url": "https://rl-conference.cc/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "iccv27-full", "name": "ICCV 2027", "type": "Full paper", "area": "Vision", "deadline": "2027-03-07T23:59:00-08:00", "timezone": "PT", "location": "TBA", "url": "https://iccv.thecvf.com/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "ecmlpkdd27", "name": "ECML-PKDD 2027", "type": "Deadline", "area": "ML", "deadline": "2027-03-19T23:59:00-12:00", "timezone": "AoE", "location": "Eindhoven, Netherlands", "url": "https://ecmlpkdd.org/2027/", "status": "estimated", "source": "estimated from previous editions"},
+  {"id": "ecai27-abs", "name": "ECAI 2027", "type": "Abstract", "area": "AI", "deadline": "2027-04-27T23:59:59-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://ecai2027.org/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "ecai27-full", "name": "ECAI 2027", "type": "Full paper", "area": "AI", "deadline": "2027-05-04T23:59:59-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://ecai2027.org/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "neurips27-abs", "name": "NeurIPS 2027", "type": "Abstract", "area": "ML", "deadline": "2027-05-14T23:59:00-12:00", "timezone": "AoE", "location": "Europe (city TBA)", "url": "https://neurips.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "neurips27-full", "name": "NeurIPS 2027", "type": "Full paper", "area": "ML", "deadline": "2027-05-21T23:59:00-12:00", "timezone": "AoE", "location": "Europe (city TBA)", "url": "https://neurips.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "emnlp27", "name": "EMNLP 2027", "type": "Deadline", "area": "NLP", "deadline": "2027-05-24T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://2027.emnlp.org/", "status": "estimated", "source": "estimated from 2026 edition (ARR submission)"},
+  {"id": "corl27-abs", "name": "CoRL 2027", "type": "Abstract", "area": "Robotics", "deadline": "2027-05-24T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.corl.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "corl27-full", "name": "CoRL 2027", "type": "Full paper", "area": "Robotics", "deadline": "2027-05-27T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.corl.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "aaai28-abs", "name": "AAAI 2028", "type": "Abstract", "area": "AI", "deadline": "2027-07-20T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://aaai.org/conference/aaai/", "status": "estimated", "source": "estimated from 2027 edition"},
+  {"id": "humanoids27", "name": "Humanoids 2027", "type": "Deadline", "area": "Robotics", "deadline": "2027-07-23T23:59:00-07:00", "timezone": "PT", "location": "TBA", "url": "https://www.ieee-ras.org/conferences-workshops/fully-sponsored/humanoids", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "aaai28-full", "name": "AAAI 2028", "type": "Full paper", "area": "AI", "deadline": "2027-07-27T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://aaai.org/conference/aaai/", "status": "estimated", "source": "estimated from 2027 edition"},
+  {"id": "icra28", "name": "ICRA 2028", "type": "Deadline", "area": "Robotics", "deadline": "2027-09-15T23:59:59-07:00", "timezone": "PT", "location": "TBA", "url": "https://www.ieee-ras.org/conferences-workshops/fully-sponsored/icra", "status": "estimated", "source": "estimated from 2027 edition"}
+]
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var DATA = JSON.parse(document.getElementById('deadlines').textContent);
+  DATA.forEach(function(d){ d.ts = Date.parse(d.deadline); d.key = d.id; });
+  DATA.sort(function(a,b){ return a.ts - b.ts; });
+
+  var row = document.getElementById('row');
+  var sel = document.getElementById('showN');
+  var foot = document.getElementById('foot');
+  var tzEl = document.getElementById('tz');
+  var chip = document.getElementById('clock-chip');
+  var chipText = document.getElementById('clock-chip-text');
+  var toastEl = document.getElementById('toast');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* ---- clock (supports ?now= offset and demo jump) ---- */
+  var offset = 0;
+  var params = new URLSearchParams(location.search);
+  if (params.get('now')) {
+    var p = Date.parse(params.get('now'));
+    if (!isNaN(p)) { offset = p - Date.now(); chip.hidden = false; chipText.textContent = 'Preview clock (?now=)'; }
+  }
+  function now(){ return Date.now() + offset; }
+
+  /* ---- N (URL hash > localStorage > 5) ---- */
+  var ALLOWED = [3,4,5,6,8,10];
+  function readN(){
+    var m = /(?:^|[#&])n=(\d+)/.exec(location.hash);
+    var n = m ? +m[1] : NaN;
+    if (!ALLOWED.includes(n)) { try { n = +localStorage.getItem('cd.showN'); } catch(e){ n = NaN; } }
+    return ALLOWED.includes(n) ? n : 5;
+  }
+  var N = readN();
+  sel.value = String(N);
+  sel.addEventListener('change', function(){
+    N = +sel.value;
+    try { localStorage.setItem('cd.showN', String(N)); } catch(e){}
+    try { history.replaceState(null, '', '#n=' + N); } catch(e){}
+    layoutCols(); tick(true);
+  });
+  window.addEventListener('hashchange', function(){ var n = readN(); if (n !== N) { N = n; sel.value = String(N); layoutCols(); tick(true); } });
+
+  function layoutCols(){
+    var w = row.clientWidth || window.innerWidth;
+    var cols = (N > 5 && w < N * 200) ? Math.ceil(N / 2) : N;
+    row.style.setProperty('--cols', cols);
+  }
+  window.addEventListener('resize', function(){ layoutCols(); });
+
+  /* ---- formatting in the viewer's timezone ---- */
+  var resolvedTZ = 'local';
+  try { resolvedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local'; } catch(e){}
+  var dtf = new Intl.DateTimeFormat(undefined, {
+    weekday:'short', day:'numeric', month:'short', year:'numeric',
+    hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZoneName:'short'
+  });
+  function part(parts, type){ var x = parts.find(function(q){ return q.type === type; }); return x ? x.value : ''; }
+  function fmtLocal(ts){
+    var parts = dtf.formatToParts(new Date(ts));
+    return part(parts,'weekday') + ' ' + part(parts,'day') + ' ' + part(parts,'month') + ' ' + part(parts,'year') +
+           ', ' + part(parts,'hour') + ':' + part(parts,'minute') + ' ' + part(parts,'timeZoneName');
+  }
+  function cfpTime(d){
+    var m = /T(\d{2}):(\d{2})/.exec(d.deadline);
+    return (m ? m[1] + ':' + m[2] : '') + ' ' + d.timezone;
+  }
+  function tzLabel(){
+    var abbr = part(dtf.formatToParts(new Date(now())), 'timeZoneName');
+    return resolvedTZ + (abbr && abbr !== resolvedTZ ? ' (' + abbr + ')' : '');
+  }
+  tzEl.textContent = 'Your timezone: ' + tzLabel();
+
+  var pad = function(n){ return (n < 10 ? '0' : '') + n; };
+
+  /* ---- card DOM ---- */
+  var LINK_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V9.5"/><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 7.5 8.5"/></svg>';
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function makeCard(d){
+    var el = document.createElement('article');
+    el.className = 'card';
+    el.dataset.key = d.key;
+    el.dataset.heat = 'none';
+    var kind = d.type === 'Deadline' ? 'Paper deadline' : d.type;
+    el.innerHTML =
+      '<div class="meta">' +
+        '<span class="pill" data-area="' + esc(d.area) + '">' + esc(d.area) + '</span>' +
+        (d.status === 'estimated' ? '<span class="est" title="' + esc(d.source) + '">estimated</span>' : '') +
+        '<a class="home" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open ' + esc(d.name) + ' homepage" title="' + esc(d.name) + ' homepage">' + LINK_SVG + '</a>' +
+      '</div>' +
+      '<h2 class="name">' + esc(d.name) + '</h2>' +
+      '<div class="kind"><b>' + esc(kind) + '</b>' + (d.location && d.location !== 'TBA' ? ' · ' + esc(d.location) : '') + '</div>' +
+      '<div class="count">' +
+        '<div class="unit days"><span class="v" data-u="d">--</span><span class="l">days</span></div>' +
+        '<div class="unit hours"><span class="v" data-u="h">--</span><span class="l">hours</span></div>' +
+        '<div class="unit mins"><span class="v" data-u="m">--</span><span class="l">min</span></div>' +
+        '<div class="unit sec"><span class="v" data-u="s">--</span><span class="l">sec</span></div>' +
+      '</div>' +
+      '<div class="when">' +
+        '<span class="local">' + esc(fmtLocal(d.ts)) + '</span>' +
+        '<span class="cfp">' + esc(cfpTime(d)) + ' · ' + esc(d.timezone === 'AoE' ? 'Anywhere on Earth (UTC−12)' : 'CFP timezone') + '</span>' +
+      '</div>';
+    el._u = { d: el.querySelector('[data-u="d"]'), h: el.querySelector('[data-u="h"]'), m: el.querySelector('[data-u="m"]'), s: el.querySelector('[data-u="s"]') };
+    el._data = d;
+    return el;
+  }
+  function updateCard(el, t){
+    var diff = Math.max(0, el._data.ts - t);
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor(diff % 86400000 / 3600000);
+    var mins = Math.floor(diff % 3600000 / 60000);
+    var secs = Math.floor(diff % 60000 / 1000);
+    var u = el._u;
+    if (u.d.textContent !== String(days)) u.d.textContent = days;
+    var hh = pad(hours), mm = pad(mins), ss = pad(secs);
+    if (u.h.textContent !== hh) u.h.textContent = hh;
+    if (u.m.textContent !== mm) u.m.textContent = mm;
+    if (u.s.textContent !== ss) u.s.textContent = ss;
+    var heat = diff < 86400000 ? 'urgent' : diff < 7 * 86400000 ? 'soon' : 'none';
+    if (el.dataset.heat !== heat) el.dataset.heat = heat;
+  }
+
+  /* ---- reconcile visible set every tick (leave / FLIP / enter) ---- */
+  var LEAVE_MS = 560;
+  function tick(force){
+    var t = now();
+    var upcoming = DATA.filter(function(d){ return d.ts > t; });
+    var want = upcoming.slice(0, N);
+    var wantKeys = want.map(function(d){ return d.key; });
+    var current = Array.prototype.filter.call(row.children, function(c){ return c.classList.contains('card') && !c.classList.contains('leaving'); });
+    var curKeys = current.map(function(c){ return c.dataset.key; });
+    var changed = force || wantKeys.length !== curKeys.length || wantKeys.some(function(k,i){ return k !== curKeys[i]; });
+
+    if (changed) {
+      var anim = !reduce.matches;
+      var staying = current.filter(function(c){ return wantKeys.includes(c.dataset.key); });
+      var leaving = current.filter(function(c){ return !wantKeys.includes(c.dataset.key); });
+      var first = new Map();
+      if (anim) staying.forEach(function(c){ first.set(c, c.getBoundingClientRect()); });
+
+      leaving.forEach(function(c){
+        if (!anim) { c.remove(); return; }
+        var r = c.getBoundingClientRect(), pr = row.getBoundingClientRect();
+        c.classList.add('leaving');
+        c.style.position = 'absolute';
+        c.style.left = (r.left - pr.left) + 'px'; c.style.top = (r.top - pr.top) + 'px';
+        c.style.width = r.width + 'px'; c.style.height = r.height + 'px';
+        setTimeout(function(){ c.remove(); }, LEAVE_MS);
+      });
+      // remove any stale non-card children (empty state)
+      Array.prototype.forEach.call(row.querySelectorAll('.empty'), function(e){ e.remove(); });
+
+      var byKey = new Map(staying.map(function(c){ return [c.dataset.key, c]; }));
+      var entering = [];
+      want.forEach(function(d){
+        var el = byKey.get(d.key);
+        if (!el) { el = makeCard(d); if (anim) el.classList.add('entering'); entering.push(el); }
+        row.appendChild(el); // appending in order also reorders staying cards
+      });
+      if (!want.length) {
+        var e = document.createElement('div'); e.className = 'empty';
+        e.textContent = 'No upcoming deadlines in the current list.';
+        row.appendChild(e);
+      }
+      entering.forEach(function(el){ updateCard(el, t); });
+
+      if (anim) {
+        // FLIP: slide staying cards from their old position to the new one
+        staying.forEach(function(c){
+          var f = first.get(c), l = c.getBoundingClientRect();
+          var dx = f.left - l.left, dy = f.top - l.top;
+          if (dx || dy) { c.style.transition = 'none'; c.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; }
+        });
+        // force style flush, then release
+        void row.offsetWidth;
+        requestAnimationFrame(function(){
+          staying.forEach(function(c){ c.style.transition = ''; c.style.transform = ''; });
+          entering.forEach(function(el){ el.classList.remove('entering'); });
+        });
+      }
+      foot.textContent = want.length + ' of ' + upcoming.length + ' upcoming deadlines · times shown in your local timezone (' + resolvedTZ + ') · dates marked estimated are inferred from the previous edition';
+    }
+
+    Array.prototype.forEach.call(row.children, function(c){ if (c.classList.contains('card') && !c.classList.contains('leaving')) updateCard(c, t); });
+  }
+
+  /* ---- demo: jump the clock to 15 s before the next deadline ---- */
+  var toastTimer;
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  document.addEventListener('keydown', function(ev){
+    if (ev.key !== 'd' || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName)) return;
+    var t = now();
+    var next = DATA.find(function(d){ return d.ts > t; });
+    if (!next) return;
+    offset = (next.ts - 15000) - Date.now();
+    chip.hidden = false; chipText.textContent = 'Demo clock · 15 s before ' + next.name;
+    tzEl.textContent = 'Your timezone: ' + tzLabel();
+    toast('Demo: clock set to 15 s before ' + next.name + ' · ' + next.type + '. Reload to reset.');
+    tick(true);
+  });
+
+  layoutCols();
+  tick(true);
+  setInterval(tick, 1000);
+})();
+</script>

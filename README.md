@@ -79,3 +79,12 @@ enable it automatically.
 ## License
 
 MIT, see `LICENSE`.
+
+## Card view
+
+A second, standalone page lives at `cards/index.html` and is served at
+https://hapi-lab-experimental.github.io/conference-countdown/cards/. It shows the
+next N deadlines as a full-screen row of countdown cards (viewer-local times,
+auto-advancing when a deadline passes). Its data is the embedded
+`<script id="deadlines" type="application/json">` block inside that file; dates
+marked "estimated" are inferred from the previous edition.
