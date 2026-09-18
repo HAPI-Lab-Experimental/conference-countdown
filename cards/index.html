@@ -315,7 +315,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     <div class="show">
       <label for="showN">Show</label>
       <select id="showN" aria-label="Number of deadlines to show">
-        <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option><option>15</option><option>20</option>
+        <option>3</option><option>4</option><option selected>5</option><option>10</option><option>15</option><option>20</option>
       </select>
     </div>
   </div>
@@ -404,11 +404,13 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   function now(){ return Date.now() + offset; }
 
   /* ---- N (URL hash > localStorage > 5) ---- */
-  var ALLOWED = [3,4,5,6,8,10,15,20];
+  var ALLOWED = [3,4,5,10,15,20];
+  var nRejected = false; // a saved value that is no longer offered (e.g. 6 or 8) falls back to 5 and is rewritten
   function readN(){
     var m = /(?:^|[#&])n=(\d+)/.exec(location.hash);
     var n = m ? +m[1] : NaN;
-    if (!ALLOWED.includes(n)) { try { n = +localStorage.getItem('cd.showN'); } catch(e){ n = NaN; } }
+    if (m && !ALLOWED.includes(n)) nRejected = true;
+    if (!ALLOWED.includes(n)) { try { var st = localStorage.getItem('cd.showN'); n = +st; if (st !== null && !ALLOWED.includes(n)) nRejected = true; } catch(e){ n = NaN; } }
     return ALLOWED.includes(n) ? n : 5;
   }
   var N = readN();
@@ -452,6 +454,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     clearBtn.hidden = !tags.size;
   }
   renderTags();
+  if (nRejected) writeState();
 
   sel.addEventListener('change', function(){
     N = +sel.value;
