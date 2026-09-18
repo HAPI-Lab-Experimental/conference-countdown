@@ -176,14 +176,14 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
   font-family:var(--display); font-weight:700; line-height:.95; margin:4px 0 0;
   font-size:clamp(22px, 13cqi, 40px); text-wrap:balance; letter-spacing:.005em;
 }
-.card .kind{color:var(--muted); font-size:clamp(12px, 4.5cqi, 14px); font-weight:500}
+.card .kind{color:var(--muted); font-size:clamp(12px, 4.5cqi, 14px); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .card .kind b{color:var(--ink); font-weight:600}
 .card .loc{color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 
 .count{
   flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:flex-start;
   /* the numerals may shrink (see fit()) so the block never spills into its neighbours */
-  gap:clamp(8px, 4cqi, 24px); padding-block:6px; flex-wrap:nowrap; overflow:hidden;
+  gap:clamp(8px, 4cqi, 24px); padding-block:calc(6px * var(--vfit, 1)); flex-wrap:nowrap; overflow:hidden;
   font-variant-numeric:tabular-nums;
 }
 .unit{display:flex; flex-direction:column; align-items:flex-start; flex:0 0 auto}
@@ -192,10 +192,10 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 .card.wide{--fit:.8}
 .card.tight{--fit:.62}
 .unit .v{
-  font-family:var(--display); font-weight:600; line-height:.9; color:var(--ink);
+  font-family:var(--display); font-weight:600; line-height:1; color:var(--ink); /* full line box, so the height fit measures the glyphs */
   font-size:calc(clamp(30px, min(21cqi, 20cqb), 112px) * var(--fit) * var(--vfit, 1)); letter-spacing:-.01em;
 }
-.unit .l{font-size:clamp(10px, 3.2cqi, 12px); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:6px; font-weight:500}
+.unit .l{font-size:calc(clamp(10px, 3.2cqi, 12px) * var(--vfit, 1)); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:calc(6px * var(--vfit, 1)); font-weight:500}
 .unit.sec .v{font-size:calc(clamp(15px, min(7cqi, 9cqb), 28px) * var(--fit) * var(--vfit, 1)); color:var(--muted); font-weight:500; align-self:flex-start}
 .unit.sec .l{margin-top:4px}
 .card[data-heat="soon"] .unit.days .v, .card[data-heat="soon"] .unit.hours .v{color:var(--soon)}
@@ -501,7 +501,12 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     // vertical: on short cards step the numerals down until the card's content fits its box
     el.style.removeProperty('--vfit');
     var v = 1;
-    var over = function(){ return el.scrollHeight > el.clientHeight || c.scrollHeight > c.clientHeight; };
+    // the countdown is vertically centred, so its digits can spill upward where scrollHeight cannot see them: compare boxes directly
+    var over = function(){
+      if (el.scrollHeight > el.clientHeight) return true;
+      var cr = c.getBoundingClientRect();
+      return Array.prototype.some.call(c.children, function(u){ var r = u.getBoundingClientRect(); return r.top < cr.top - 0.5 || r.bottom > cr.bottom + 0.5; });
+    };
     while (over() && v > 0.45) { v -= 0.1; el.style.setProperty('--vfit', v.toFixed(2)); }
   }
   function refit(){
