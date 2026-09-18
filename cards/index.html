@@ -62,7 +62,26 @@ body{
 }
 .chip .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-.controls{display:flex; align-items:center; gap:8px; flex:none}
+.controls{display:flex; align-items:center; gap:8px 18px; flex:none; flex-wrap:wrap; justify-content:flex-end}
+.show{display:flex; align-items:center; gap:8px}
+.tags{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.tag{
+  font:inherit; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; line-height:1.4;
+  padding:3px 10px; border-radius:999px; cursor:pointer;
+  color:var(--area); background:var(--surface); border:1.5px solid color-mix(in srgb, var(--area) 45%, transparent);
+  transition:background .15s, color .15s, border-color .15s;
+}
+.tag:hover{background:color-mix(in srgb, var(--area) 13%, transparent)}
+.tag[aria-pressed="true"]{background:var(--area); color:var(--surface); border-color:var(--area)}
+.tag[data-area="RL"]{--area:var(--area-rl)} .tag[data-area="Robotics"]{--area:var(--area-robotics)}
+.tag[data-area="ML"]{--area:var(--area-ml)} .tag[data-area="AI"]{--area:var(--area-ai)}
+.tag[data-area="Vision"]{--area:var(--area-vision)} .tag[data-area="NLP"]{--area:var(--area-nlp)}
+.tag-clear{
+  font:inherit; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+  color:var(--muted); background:none; border:1.5px solid var(--rule-strong); border-radius:999px; padding:3px 10px;
+}
+.tag-clear:hover{color:var(--ink); border-color:var(--ink)}
+.tags .hint{font-size:11.5px; color:var(--muted); margin-right:2px; white-space:nowrap}
 .controls label{font-size:12.5px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.06em}
 .controls select{
   font:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface);
@@ -182,10 +201,15 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     </div>
   </div>
   <div class="controls">
-    <label for="showN">Show</label>
-    <select id="showN" aria-label="Number of deadlines to show">
-      <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option>
-    </select>
+    <div class="tags" id="tags" role="group" aria-label="Filter by area (any selected area matches)">
+      <span class="hint" id="tags-hint">All areas</span>
+    </div>
+    <div class="show">
+      <label for="showN">Show</label>
+      <select id="showN" aria-label="Number of deadlines to show">
+        <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option>
+      </select>
+    </div>
   </div>
 </header>
 
@@ -279,17 +303,61 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   }
   var N = readN();
   sel.value = String(N);
+
+  /* ---- area tags (OR filter; none selected = all areas) ---- */
+  var AREAS = ['RL','Robotics','ML','AI','Vision','NLP'].filter(function(a){ return DATA.some(function(d){ return d.area === a; }); });
+  function readTags(){
+    var m = /(?:^|[#&])tags=([^&]*)/.exec(location.hash);
+    var raw = m ? decodeURIComponent(m[1]) : null;
+    if (raw === null) { try { raw = localStorage.getItem('cd.tags'); } catch(e){ raw = null; } }
+    var set = new Set();
+    (raw || '').split(',').forEach(function(a){ if (AREAS.includes(a)) set.add(a); });
+    return set;
+  }
+  var tags = readTags();
+  function tagsStr(){ return AREAS.filter(function(a){ return tags.has(a); }).join(','); }
+  function writeState(){
+    try { localStorage.setItem('cd.showN', String(N)); localStorage.setItem('cd.tags', tagsStr()); } catch(e){}
+    try { history.replaceState(null, '', '#n=' + N + (tags.size ? '&tags=' + tagsStr() : '')); } catch(e){}
+  }
+  var tagsBox = document.getElementById('tags');
+  var tagsHint = document.getElementById('tags-hint');
+  var tagBtns = AREAS.map(function(a){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tag'; b.dataset.area = a; b.textContent = a;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function(){ if (tags.has(a)) tags.delete(a); else tags.add(a); writeState(); renderTags(); tick(true); });
+    tagsBox.appendChild(b);
+    return b;
+  });
+  var clearBtn = document.createElement('button');
+  clearBtn.type = 'button'; clearBtn.className = 'tag-clear'; clearBtn.id = 'tags-clear'; clearBtn.textContent = 'All';
+  clearBtn.setAttribute('aria-label', 'Clear area filter and show all areas');
+  clearBtn.addEventListener('click', function(){ tags.clear(); writeState(); renderTags(); tick(true); });
+  tagsBox.appendChild(clearBtn);
+  function renderTags(){
+    tagBtns.forEach(function(b){ b.setAttribute('aria-pressed', tags.has(b.dataset.area) ? 'true' : 'false'); });
+    tagsHint.textContent = tags.size ? 'Any of:' : 'All areas';
+    clearBtn.hidden = !tags.size;
+  }
+  renderTags();
+
   sel.addEventListener('change', function(){
     N = +sel.value;
-    try { localStorage.setItem('cd.showN', String(N)); } catch(e){}
-    try { history.replaceState(null, '', '#n=' + N); } catch(e){}
-    layoutCols(); tick(true);
+    writeState(); tick(true);
   });
-  window.addEventListener('hashchange', function(){ var n = readN(); if (n !== N) { N = n; sel.value = String(N); layoutCols(); tick(true); } });
+  window.addEventListener('hashchange', function(){
+    var n = readN(), t2 = readTags(), changed = false;
+    if (n !== N) { N = n; sel.value = String(N); changed = true; }
+    if (tagsStr() !== AREAS.filter(function(a){ return t2.has(a); }).join(',')) { tags = t2; renderTags(); changed = true; }
+    if (changed) tick(true);
+  });
 
-  function layoutCols(){
+  var shown = N;
+  function layoutCols(count){
+    if (count !== undefined) shown = Math.max(1, Math.min(N, count));
     var w = row.clientWidth || window.innerWidth;
-    var cols = (N > 5 && w < N * 200) ? Math.ceil(N / 2) : N;
+    var cols = (shown > 5 && w < shown * 200) ? Math.ceil(shown / 2) : shown;
     row.style.setProperty('--cols', cols);
   }
   window.addEventListener('resize', function(){ layoutCols(); });
@@ -370,8 +438,9 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   var LEAVE_MS = 560;
   function tick(force){
     var t = now();
-    var upcoming = DATA.filter(function(d){ return d.ts > t; });
+    var upcoming = DATA.filter(function(d){ return d.ts > t && (!tags.size || tags.has(d.area)); });
     var want = upcoming.slice(0, N);
+    layoutCols(want.length);
     var wantKeys = want.map(function(d){ return d.key; });
     var current = Array.prototype.filter.call(row.children, function(c){ return c.classList.contains('card') && !c.classList.contains('leaving'); });
     var curKeys = current.map(function(c){ return c.dataset.key; });
@@ -405,7 +474,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
       });
       if (!want.length) {
         var e = document.createElement('div'); e.className = 'empty';
-        e.textContent = 'No upcoming deadlines in the current list.';
+        e.textContent = tags.size ? 'No upcoming deadlines for ' + tagsStr().replace(/,/g, ', ') + '.' : 'No upcoming deadlines in the current list.';
         row.appendChild(e);
       }
       entering.forEach(function(el){ updateCard(el, t); });
@@ -424,7 +493,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
           entering.forEach(function(el){ el.classList.remove('entering'); });
         });
       }
-      foot.textContent = want.length + ' of ' + upcoming.length + ' upcoming deadlines · times shown in your local timezone (' + resolvedTZ + ') · dates marked estimated are inferred from the previous edition';
+      foot.textContent = want.length + ' of ' + upcoming.length + ' upcoming deadlines' + (tags.size ? ' in ' + tagsStr().replace(/,/g, ', ') : '') + ' · times shown in your local timezone (' + resolvedTZ + ') · dates marked estimated are inferred from the previous edition';
     }
 
     Array.prototype.forEach.call(row.children, function(c){ if (c.classList.contains('card') && !c.classList.contains('leaving')) updateCard(c, t); });
@@ -440,7 +509,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     if (ev.key !== 'd' || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName)) return;
     var t = now();
-    var next = DATA.find(function(d){ return d.ts > t; });
+    var next = DATA.find(function(d){ return d.ts > t && (!tags.size || tags.has(d.area)); });
     if (!next) return;
     offset = (next.ts - 15000) - Date.now();
     chip.hidden = false; chipText.textContent = 'Demo clock · 15 s before ' + next.name;
@@ -449,7 +518,6 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     tick(true);
   });
 
-  layoutCols();
   tick(true);
   setInterval(tick, 1000);
 })();
