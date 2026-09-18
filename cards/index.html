@@ -204,14 +204,6 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 .when{border-top:1px solid var(--rule); padding-top:10px; display:flex; flex-direction:column; gap:2px}
 .when .local{font-weight:600; font-size:clamp(12.5px, 4.6cqi, 15px); font-variant-numeric:tabular-nums}
 .when .cfp{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
-.meta .due{
-  display:inline-flex; align-items:center; gap:5px;
-  padding:1px 8px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; line-height:1.4;
-  color:var(--soon); background:var(--soon-bg); border:1px solid var(--soon);
-}
-.meta .due::before{content:"\25B2"; font-size:9px}
-.card[data-heat="urgent"] .meta .due{color:var(--urgent); background:var(--urgent-bg); border-color:var(--urgent)}
-.card[data-heat="urgent"] .meta .due::before{content:"\26A0"; font-size:11px}
 
 .empty{grid-column:1/-1; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:15px; text-align:center; padding:24px}
 
@@ -462,7 +454,6 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
       '<div class="meta">' +
         d.areas.map(function(a){ return '<span class="pill" data-area="' + esc(a) + '">' + esc(a) + '</span>'; }).join('') +
         (d.status === 'estimated' ? '<span class="est" title="' + esc(d.source) + '">estimated</span>' : '') +
-        '<span class="due" data-due hidden></span>' +
         '<a class="home" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open ' + esc(d.name) + ' homepage" title="' + esc(d.name) + ' homepage">' + LINK_SVG + '</a>' +
       '</div>' +
       '<h2 class="name">' + esc(d.name) + '</h2>' +
@@ -478,7 +469,6 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
         '<span class="cfp">' + esc(cfpTime(d)) + ' · ' + esc(d.timezone === 'AoE' ? 'Anywhere on Earth (UTC−12)' : 'CFP timezone') + '</span>' +
       '</div>';
     el._u = { d: el.querySelector('[data-u="d"]'), h: el.querySelector('[data-u="h"]'), m: el.querySelector('[data-u="m"]'), s: el.querySelector('[data-u="s"]') };
-    el._due = el.querySelector('[data-due]');
     el._data = d;
     return el;
   }
@@ -501,8 +491,6 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     if (u.s.textContent !== ss) u.s.textContent = ss;
     var heat = diff < 86400000 ? 'urgent' : diff < 7 * 86400000 ? 'soon' : 'none';
     if (el.dataset.heat !== heat) el.dataset.heat = heat;
-    var due = heat === 'none' ? '' : heat === 'urgent' ? (hours < 1 ? 'Due in ' + Math.max(1, mins) + ' min' : 'Due in ' + (hours + 1) + ' h') : 'Due in ' + (days + 1) + (days + 1 === 1 ? ' day' : ' days');
-    if (el._due.textContent !== due) { el._due.textContent = due; el._due.hidden = !due; }
   }
 
   /* ---- make sure the three groups fit the card width ---- */
@@ -513,7 +501,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     // vertical: on short cards step the numerals down until the card's content fits its box
     el.style.removeProperty('--vfit');
     var v = 1;
-    var over = function(){ return el.scrollHeight > el.clientHeight + 1 || c.scrollHeight > c.clientHeight + 1; };
+    var over = function(){ return el.scrollHeight > el.clientHeight || c.scrollHeight > c.clientHeight; };
     while (over() && v > 0.45) { v -= 0.1; el.style.setProperty('--vfit', v.toFixed(2)); }
   }
   function refit(){
