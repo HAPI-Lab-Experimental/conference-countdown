@@ -88,7 +88,7 @@ body{
   font-variant:small-caps; letter-spacing:.08em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
   text-align:center; opacity:1; transition:opacity .4s ease;
 }
-.quote.reveal figcaption{opacity:0}
+.quote.reveal figcaption{opacity:0; transition:none} /* hidden instantly at the swap, fades back in when the reveal completes */
 .quote.face-playfair p{font-family:"Playfair Display",Georgia,"Times New Roman",serif; font-style:italic; font-weight:600}
 .quote.face-lora p{font-family:Lora,Georgia,serif; font-weight:500}
 .quote.face-lora-i p{font-family:Lora,Georgia,serif; font-style:italic; font-weight:500}
