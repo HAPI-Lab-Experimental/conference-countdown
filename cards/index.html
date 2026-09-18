@@ -98,6 +98,7 @@ body{
 .quote.face-cormorant-i p{font-family:"Cormorant Garamond",Garamond,Georgia,serif; font-style:italic; font-weight:600}
 .quote.face-condensed p{font-family:var(--display); font-weight:600; text-transform:uppercase; letter-spacing:.02em}
 @media (max-width:1099px){ .quote{display:none} }
+.quote.narrow, .quote.nofit{visibility:hidden} /* column too narrow (< 260px) or no quote fits: show nothing rather than a truncated line */
 .show{display:flex; align-items:center; gap:8px}
 .tags{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
 .tag{
@@ -641,8 +642,13 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     });
     return { html: html, total: d + 350 };
   }
-  function qVisible(){ return qFig.offsetParent !== null && qFig.clientWidth > 0; }
-  function qOverflows(){ return qText.scrollHeight > qText.clientHeight + 1 || qFig.scrollHeight > qFig.clientHeight + 1; }
+  var Q_MIN_WIDTH = 260;
+  function qVisible(){ return qFig.offsetParent !== null && qFig.clientWidth >= Q_MIN_WIDTH; }
+  function qOverflows(){ return qText.scrollHeight > qText.clientHeight + 1 || qFig.scrollHeight > qFig.clientHeight + 1 || qWho.scrollWidth > qWho.clientWidth + 1; }
+  if (window.ResizeObserver) new ResizeObserver(function(){
+    var narrow = qFig.clientWidth < Q_MIN_WIDTH;
+    if (narrow !== qFig.classList.contains('narrow')) { qFig.classList.toggle('narrow', narrow); if (!narrow) renderQuote(qIdx); }
+  }).observe(qFig);
   /* Render quote i; shrink the type toward a 12px floor until it fits two lines, else try the next quote. */
   function renderQuote(i, tries){
     var q = QUOTES[i], animate = !!arguments[2] && !reduce.matches;
@@ -651,12 +657,14 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     qFig.className = 'quote face-' + q.f + (animate ? ' reveal' : '');
     qText.innerHTML = built.html; qWho.textContent = q.w;
     if (animate) qRevealTimer = setTimeout(function(){ qFig.classList.remove('reveal'); }, built.total + 150);
+    qFig.classList.remove('nofit');
     if (!qVisible()) { qIdx = i; return; }
     var base = Math.min(17, Math.max(13, window.innerWidth * 0.009)) * (FACE_SCALE[q.f] || 1);
     var fs = base;
     qText.style.fontSize = fs.toFixed(1) + 'px';
     while (qOverflows() && fs >= 12.5) { fs -= 0.5; qText.style.fontSize = fs.toFixed(1) + 'px'; }
     if (qOverflows() && (tries || 0) < QUOTES.length) return renderQuote((i + 1) % QUOTES.length, (tries || 0) + 1, animate);
+    if (qOverflows()) qFig.classList.add('nofit'); // nothing fits at this width: hide rather than truncate
     qIdx = i;
   }
   function nextQuote(){
