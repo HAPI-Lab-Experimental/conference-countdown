@@ -1,7 +1,7 @@
 <title>Conference Deadlines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@1,600&family=Lora:ital,wght@0,500;1,500&family=Zilla+Slab:wght@600&family=IBM+Plex+Mono:wght@500&family=Dancing+Script:wght@600&family=Cormorant+Garamond:ital,wght@0,600;1,600&display=swap">
 <style>
 :root{
   color-scheme: light;
@@ -62,7 +62,35 @@ body{
 }
 .chip .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.top > .brand{flex:none}
 .controls{display:flex; align-items:center; gap:8px 18px; flex:none; flex-wrap:wrap; justify-content:flex-end}
+
+/* Rotating researcher quote in the header's middle column */
+.quote{
+  /* definite height = title block (28px h1 + 6px + 17.5px subtitle), so the quote can never change the header height */
+  flex:1 1 0; min-width:0; height:51.5px; align-self:flex-end; margin:0; padding:0 8px;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+  overflow:hidden; opacity:1; transition:opacity .6s ease;
+}
+.quote.fade{opacity:0}
+.quote p{
+  margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  line-height:1.15; color:var(--ink); text-wrap:balance;
+}
+.quote figcaption{
+  margin-top:2px; font-family:var(--body); font-size:11px; line-height:1; color:var(--muted);
+  font-variant:small-caps; letter-spacing:.08em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+.quote.face-playfair p{font-family:"Playfair Display",Georgia,"Times New Roman",serif; font-style:italic; font-weight:600}
+.quote.face-lora p{font-family:Lora,Georgia,serif; font-weight:500}
+.quote.face-lora-i p{font-family:Lora,Georgia,serif; font-style:italic; font-weight:500}
+.quote.face-zilla p{font-family:"Zilla Slab","Roboto Slab",Georgia,serif; font-weight:600}
+.quote.face-mono p{font-family:"IBM Plex Mono",Menlo,Consolas,monospace; font-weight:500}
+.quote.face-script p{font-family:"Dancing Script","Brush Script MT",cursive; font-weight:600}
+.quote.face-cormorant p{font-family:"Cormorant Garamond",Garamond,Georgia,serif; font-weight:600}
+.quote.face-cormorant-i p{font-family:"Cormorant Garamond",Garamond,Georgia,serif; font-style:italic; font-weight:600}
+.quote.face-condensed p{font-family:var(--display); font-weight:600; text-transform:uppercase; letter-spacing:.02em}
+@media (max-width:1099px){ .quote{display:none} }
 .show{display:flex; align-items:center; gap:8px}
 .tags{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
 .tag{
@@ -190,13 +218,14 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
 }
 @media (prefers-reduced-motion: reduce){
   .card{transition:none}
+  .quote{transition:none}
   .card.entering{opacity:1; transform:none}
   .chip .pulse{animation:none}
 }
 </style>
 
 <header class="top">
-  <div>
+  <div class="brand">
     <h1>Conference Deadlines</h1>
     <div class="sub">
       <span id="tz">Your timezone: detecting…</span>
@@ -204,6 +233,10 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
       <span id="clock-chip" class="chip" hidden><span class="pulse"></span><span id="clock-chip-text">Preview clock</span></span>
     </div>
   </div>
+  <figure class="quote" id="quote" aria-live="off" aria-label="Quote from a researcher">
+    <p id="quote-text"></p>
+    <figcaption id="quote-who"></figcaption>
+  </figure>
   <div class="controls">
     <div class="tags" id="tags" role="group" aria-label="Filter by area (any selected area matches)">
       <span class="hint" id="tags-hint">All areas</span>
@@ -545,5 +578,57 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
 
   tick(true);
   setInterval(tick, 1000);
+
+  /* ---- rotating researcher quotes (header middle column) ---- */
+  var QUOTES = [
+    { t: 'We can only see a short distance ahead, but we can see plenty there that needs to be done.', w: 'Alan Turing, 1950', f: 'playfair' },
+    { t: '\u2026general methods that leverage computation are ultimately the most effective, and by a large margin.', w: 'Richard Sutton, The Bitter Lesson, 2019', f: 'mono' },
+    { t: 'Data do not understand causes and effects; humans do.', w: 'Judea Pearl, The Book of Why, 2018', f: 'lora-i' },
+    { t: 'The world is its own best model. It is always exactly up to date. It always contains every detail there is to be known.', w: 'Rodney Brooks, 1990', f: 'zilla' },
+    { t: 'You don\u2019t understand anything until you learn it more than one way.', w: 'Marvin Minsky', f: 'script' },
+    { t: 'A wealth of information creates a poverty of attention.', w: 'Herbert Simon, 1971', f: 'cormorant-i' },
+    { t: 'The Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform.', w: 'Ada Lovelace, 1843', f: 'cormorant' },
+    { t: 'The best material model of a cat is another, or preferably the same, cat.', w: 'Arturo Rosenblueth & Norbert Wiener, 1945', f: 'zilla' },
+    { t: 'AI is the new electricity.', w: 'Andrew Ng, 2017', f: 'condensed' },
+    { t: 'There\u2019s nothing artificial about AI. It\u2019s inspired by people, it\u2019s created by people, and \u2014 most importantly \u2014 it impacts people.', w: 'Fei-Fei Li, 2018', f: 'lora' },
+    { t: 'If intelligence is a cake, the bulk of the cake is unsupervised learning, the icing on the cake is supervised learning, and the cherry on the cake is reinforcement learning.', w: 'Yann LeCun, NIPS 2016', f: 'condensed' },
+    { t: 'Machines are beneficial to the extent that their actions can be expected to achieve our objectives.', w: 'Stuart Russell, Human Compatible, 2019', f: 'playfair' },
+    { t: 'Reinforcement learning is learning what to do \u2014 how to map situations to actions \u2014 so as to maximize a numerical reward signal.', w: 'Richard Sutton & Andrew Barto, Reinforcement Learning: An Introduction', f: 'mono' },
+    { t: 'The question of whether Machines Can Think\u2026 is about as relevant as the question of whether Submarines Can Swim.', w: 'Edsger Dijkstra, 1984', f: 'zilla' },
+    { t: 'Programming computers to learn from experience should eventually eliminate the need for much of this detailed programming effort.', w: 'Arthur Samuel, 1959', f: 'lora' },
+    { t: 'Solve intelligence, and then use that to solve everything else.', w: 'Demis Hassabis, DeepMind', f: 'script' },
+    { t: 'I was more motivated by curiosity. Never by the desire for financial gain. I just wondered how things were put together.', w: 'Claude Shannon', f: 'cormorant-i' }
+  ];
+  var FACE_SCALE = { playfair: 1, lora: 1, 'lora-i': 1, zilla: 1, mono: .9, script: 1.3, cormorant: 1.18, 'cormorant-i': 1.18, condensed: 1.15 };
+  var qFig = document.getElementById('quote'), qText = document.getElementById('quote-text'), qWho = document.getElementById('quote-who');
+  var qIdx = Math.floor(Math.random() * QUOTES.length), qPaused = false, qTimer;
+  function qVisible(){ return qFig.offsetParent !== null && qFig.clientWidth > 0; }
+  function qOverflows(){ return qText.scrollHeight > qText.clientHeight + 1 || qFig.scrollHeight > qFig.clientHeight + 1; }
+  /* Render quote i; shrink the type toward a 12px floor until it fits two lines, else try the next quote. */
+  function renderQuote(i, tries){
+    var q = QUOTES[i];
+    qFig.className = 'quote face-' + q.f;
+    qText.textContent = q.t; qWho.textContent = q.w;
+    if (!qVisible()) { qIdx = i; return; }
+    var base = Math.min(17, Math.max(13, window.innerWidth * 0.009)) * (FACE_SCALE[q.f] || 1);
+    var fs = base;
+    qText.style.fontSize = fs.toFixed(1) + 'px';
+    while (qOverflows() && fs >= 12.5) { fs -= 0.5; qText.style.fontSize = fs.toFixed(1) + 'px'; }
+    if (qOverflows() && (tries || 0) < QUOTES.length) return renderQuote((i + 1) % QUOTES.length, (tries || 0) + 1);
+    qIdx = i;
+  }
+  function nextQuote(){
+    if (qPaused || !qVisible()) return;
+    if (reduce.matches) { renderQuote((qIdx + 1) % QUOTES.length); return; }
+    qFig.classList.add('fade');
+    setTimeout(function(){ renderQuote((qIdx + 1) % QUOTES.length); qFig.classList.remove('fade'); }, 600);
+  }
+  qFig.addEventListener('mouseenter', function(){ qPaused = true; });
+  qFig.addEventListener('mouseleave', function(){ qPaused = false; });
+  window.addEventListener('resize', function(){ renderQuote(qIdx); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ renderQuote(qIdx); });
+  renderQuote(qIdx);
+  qTimer = setInterval(nextQuote, 25000);
+  window.__cdQuote = { render: renderQuote, count: QUOTES.length, index: function(){ return qIdx; } };
 })();
 </script>
