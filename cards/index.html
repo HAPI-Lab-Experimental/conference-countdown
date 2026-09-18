@@ -78,11 +78,10 @@ body{
   margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   line-height:1.15; color:var(--ink); text-wrap:balance; text-align:center; width:100%;
 }
-/* "being written" reveal: each word (or character, for script faces) fades in on its own CSS delay; the caret rides the newest one */
-.quote .w{display:inline; border-right:2px solid transparent; padding-right:1px; margin-right:-3px}
-.quote.reveal .w{opacity:0; animation:qw .26s ease-out forwards, qcaret var(--caret, .4s) steps(1, end) forwards}
+/* "being written" reveal: each word (or character, for script faces) fades in on its own CSS delay, one after another; no caret */
+.quote .w{display:inline}
+.quote.reveal .w{opacity:0; animation:qw .35s ease-out forwards}
 @keyframes qw{from{opacity:0; transform:translateY(2px)} to{opacity:1; transform:none}}
-@keyframes qcaret{0%, 85%{border-right-color:var(--ink)} 100%{border-right-color:transparent}}
 .quote figcaption{
   margin-top:2px; font-family:var(--body); font-size:11px; line-height:1; color:var(--muted);
   font-variant:small-caps; letter-spacing:.08em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
@@ -639,14 +638,14 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   function buildSpans(q) {
     var byChar = q.f === 'script';
     var units = byChar ? Array.from(q.t) : q.t.split(' ');
-    var step = Math.min(byChar ? 32 : 55, 3000 / Math.max(1, units.length));
+    var step = Math.min(byChar ? 70 : 200, 7000 / Math.max(1, units.length)); // ~200 ms per word (70 ms per character), whole quote within ~7 s
     var html = '', d = 0;
     units.forEach(function(u, i){
       if (byChar && u === ' ') { html += ' '; return; }
-      html += '<span class="w" style="animation-delay:' + Math.round(d) + 'ms; --caret:' + Math.round(step + 260) + 'ms">' + esc(u) + '</span>' + (byChar ? '' : (i < units.length - 1 ? ' ' : ''));
+      html += '<span class="w" style="animation-delay:' + Math.round(d) + 'ms">' + esc(u) + '</span>' + (byChar ? '' : (i < units.length - 1 ? ' ' : ''));
       d += step;
     });
-    return { html: html, total: d + 260 };
+    return { html: html, total: d + 350 };
   }
   function qVisible(){ return qFig.offsetParent !== null && qFig.clientWidth > 0; }
   function qOverflows(){ return qText.scrollHeight > qText.clientHeight + 1 || qFig.scrollHeight > qFig.clientHeight + 1; }
