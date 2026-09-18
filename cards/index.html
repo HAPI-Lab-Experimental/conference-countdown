@@ -232,6 +232,15 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
 }
 .toast.show{opacity:1}
 
+/* Three or more rows (Show 15 / 20): fixed row height, page scrolls, header sticks */
+@media (min-width: 700px) and (min-height: 500px){
+  html.tall, html.tall body{height:auto}
+  html.tall body{overflow:visible; min-height:100%}
+  html.tall .top{position:sticky; top:0; z-index:5; background:var(--ground); margin-top:-12px; padding-top:12px}
+  html.tall main{flex:none; min-height:0}
+  html.tall .row{height:auto; grid-auto-rows:var(--row-h, 300px)}
+  html.tall footer{position:static}
+}
 /* Small screens: phones (portrait), landscape phones and portrait tablets scroll the page; cards take their natural height */
 @media (max-width: 699px), (max-height: 499px), ((min-width: 700px) and (max-width: 1023px) and (orientation: portrait)){
   html,body{height:auto}
@@ -258,7 +267,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   .tag, .tag-clear{min-height:40px; padding:8px 14px; flex:none; letter-spacing:.06em}
   .tag:not([aria-pressed="true"])::before{display:inline-block}
   main{padding-block:12px 8px; overflow:visible}
-  .row{height:auto; display:grid; grid-template-columns:1fr !important; grid-auto-rows:auto; gap:12px}
+  .row{height:auto; display:grid; grid-template-columns:1fr !important; grid-auto-rows:auto !important; gap:12px}
   .card{height:auto; min-height:0; container-type:inline-size; padding:16px; gap:6px; transition:none}
   .card .name{font-size:26px}
   .card .kind{white-space:normal}
@@ -306,7 +315,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     <div class="show">
       <label for="showN">Show</label>
       <select id="showN" aria-label="Number of deadlines to show">
-        <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option>
+        <option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option><option>15</option><option>20</option>
       </select>
     </div>
   </div>
@@ -395,7 +404,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   function now(){ return Date.now() + offset; }
 
   /* ---- N (URL hash > localStorage > 5) ---- */
-  var ALLOWED = [3,4,5,6,8,10];
+  var ALLOWED = [3,4,5,6,8,10,15,20];
   function readN(){
     var m = /(?:^|[#&])n=(\d+)/.exec(location.hash);
     var n = m ? +m[1] : NaN;
@@ -456,11 +465,21 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   });
 
   var shown = N;
+  var topEl = document.querySelector('.top'), footEl = document.querySelector('footer');
+  /* Five cards per row at most. Up to two rows share the viewport height; three or four rows (Show 15 / 20)
+     use the two-row card height as a fixed row height and the page scrolls under the sticky header. */
   function layoutCols(count){
     if (count !== undefined) shown = Math.max(1, Math.min(N, count));
-    var w = row.clientWidth || window.innerWidth;
-    var cols = (shown > 5 && w < shown * 200) ? Math.ceil(shown / 2) : shown;
+    var cols = Math.min(shown, 5), rows = Math.ceil(shown / cols);
     row.style.setProperty('--cols', cols);
+    var tall = rows > 2;
+    // the Show-10 row height at this viewport: (viewport - header - footer - body and main padding - one gap) / 2
+    // (the sticky header is 12px taller in tall mode, so measure it as it is in the two-row layout)
+    var topH = topEl.offsetHeight - (document.documentElement.classList.contains('tall') ? 12 : 0);
+    document.documentElement.classList.toggle('tall', tall);
+    var chrome = topH + footEl.offsetHeight + 24 + 24 + 14;
+    var rowH = Math.max(140, (window.innerHeight - chrome) / 2);
+    row.style.setProperty('--row-h', rowH.toFixed(2) + 'px');
   }
   window.addEventListener('resize', function(){ layoutCols(); });
 
