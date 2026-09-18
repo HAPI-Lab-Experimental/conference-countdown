@@ -13,7 +13,7 @@
   --soon:#B4690E; --soon-bg:#FFF4E3; --urgent:#C0331E; --urgent-bg:#FDECE8;
   --focus:#1D4ED8;
   /* colour-blind-safe categorical palette: one set of fills for both themes (white text on the fill >= 4.5:1, fill vs either surface >= 3:1), snapped with the dataviz palette validator; a text label always accompanies the colour */
-  --area-rl:#C82D45; --area-robotics:#9343BC; --area-ml:#A84B07; --area-ai:#B1389B; --area-planning:#017716; --area-vision:#555BDA; --area-nlp:#068665;
+  --area-rl:#BE296A; --area-robotics:#585EDD; --area-ml:#0C7A48; --area-ai:#8B47C4; --area-planning:#467504; --area-vision:#0479B2; --area-nlp:#C52D1F; --area-hai:#AD3498;
   --shadow:0 1px 2px rgba(21,26,33,.06), 0 8px 24px -12px rgba(21,26,33,.18);
   --gap:14px;
   --display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
@@ -25,7 +25,7 @@
     --ground:#0E1116; --surface:#171B22; --ink:#EDEFF2; --muted:#9AA3AF; --rule:#2A3039; --rule-strong:#3B434F;
     --soon:#E9A23B; --soon-bg:#2A2114; --urgent:#F0705A; --urgent-bg:#2E1914;
     --focus:#8AB4FF;
-    --area-rl:#C82D45; --area-robotics:#9343BC; --area-ml:#A84B07; --area-ai:#B1389B; --area-planning:#017716; --area-vision:#555BDA; --area-nlp:#068665;
+    --area-rl:#BE296A; --area-robotics:#585EDD; --area-ml:#0C7A48; --area-ai:#8B47C4; --area-planning:#467504; --area-vision:#0479B2; --area-nlp:#C52D1F; --area-hai:#AD3498;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   }
 }
@@ -34,7 +34,7 @@
   --ground:#0E1116; --surface:#171B22; --ink:#EDEFF2; --muted:#9AA3AF; --rule:#2A3039; --rule-strong:#3B434F;
   --soon:#E9A23B; --soon-bg:#2A2114; --urgent:#F0705A; --urgent-bg:#2E1914;
   --focus:#8AB4FF;
-  --area-rl:#C82D45; --area-robotics:#9343BC; --area-ml:#A84B07; --area-ai:#B1389B; --area-planning:#017716; --area-vision:#555BDA; --area-nlp:#068665;
+  --area-rl:#BE296A; --area-robotics:#585EDD; --area-ml:#0C7A48; --area-ai:#8B47C4; --area-planning:#467504; --area-vision:#0479B2; --area-nlp:#C52D1F; --area-hai:#AD3498;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
@@ -127,7 +127,7 @@ body{
 .tag[aria-pressed="true"]::before{content:"\2713"; width:auto; height:auto; border-radius:0; background:none; font-weight:700; line-height:1}
 .tag[data-area="RL"]{--area:var(--area-rl)} .tag[data-area="Robotics"]{--area:var(--area-robotics)}
 .tag[data-area="ML"]{--area:var(--area-ml)} .tag[data-area="AI"]{--area:var(--area-ai)}
-.tag[data-area="Vision"]{--area:var(--area-vision)} .tag[data-area="NLP"]{--area:var(--area-nlp)} .tag[data-area="Planning"]{--area:var(--area-planning)}
+.tag[data-area="Vision"]{--area:var(--area-vision)} .tag[data-area="NLP"]{--area:var(--area-nlp)} .tag[data-area="Planning"]{--area:var(--area-planning)} .tag[data-area="HAI"]{--area:var(--area-hai)}
 .tag-clear{
   font:inherit; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
   color:var(--muted); background:none; border:1.5px solid var(--rule-strong); border-radius:999px; padding:3px 10px;
@@ -174,7 +174,7 @@ main{flex:1 1 auto; min-height:0; position:relative; padding-block:var(--gap) 10
 }
 .pill[data-area="RL"]{--area:var(--area-rl)} .pill[data-area="Robotics"]{--area:var(--area-robotics)}
 .pill[data-area="ML"]{--area:var(--area-ml)} .pill[data-area="AI"]{--area:var(--area-ai)}
-.pill[data-area="Vision"]{--area:var(--area-vision)} .pill[data-area="NLP"]{--area:var(--area-nlp)} .pill[data-area="Planning"]{--area:var(--area-planning)}
+.pill[data-area="Vision"]{--area:var(--area-vision)} .pill[data-area="NLP"]{--area:var(--area-nlp)} .pill[data-area="Planning"]{--area:var(--area-planning)} .pill[data-area="HAI"]{--area:var(--area-hai)}
 .est{
   display:inline-flex; align-items:center; padding:1px 7px; border-radius:999px; border:1px dashed var(--rule-strong);
   color:var(--muted); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:500;
@@ -333,7 +333,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
 
 <script id="deadlines" type="application/json">
 [
-  {"id": "hri27-full", "name": "HRI 2027", "type": "Full paper", "area": "Robotics", "deadline": "2026-09-18T23:59:00-12:00", "timezone": "AoE", "location": "Santa Clara, CA, USA", "url": "https://humanrobotinteraction.org/2027/", "status": "verified", "source": "humanrobotinteraction.org (web search)"},
+  {"id": "hri27-full", "name": "HRI 2027", "type": "Full paper", "area": ["Robotics", "HAI"], "deadline": "2026-09-18T23:59:00-12:00", "timezone": "AoE", "location": "Santa Clara, CA, USA", "url": "https://humanrobotinteraction.org/2027/", "status": "verified", "source": "humanrobotinteraction.org (web search)"},
   {"id": "iclr27-abs", "name": "ICLR 2027", "type": "Abstract", "area": "ML", "deadline": "2026-09-18T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://iclr.cc/Conferences/2027", "status": "verified", "source": "ccfddl"},
   {"id": "iclr27-full", "name": "ICLR 2027", "type": "Full paper", "area": "ML", "deadline": "2026-09-25T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://iclr.cc/Conferences/2027", "status": "verified", "source": "ccfddl"},
   {"id": "aistats27-abs", "name": "AISTATS 2027", "type": "Abstract", "area": "ML", "deadline": "2026-09-29T23:59:59-12:00", "timezone": "AoE", "location": "Montréal, Canada", "url": "https://virtual.aistats.org/Conferences/2027", "status": "verified", "source": "ccfddl"},
@@ -343,6 +343,10 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   {"id": "aamas27-full", "name": "AAMAS 2027", "type": "Full paper", "area": "AI", "deadline": "2026-10-09T11:59:00+00:00", "timezone": "UTC", "location": "Hanoi, Vietnam", "url": "https://openreview.net/group?id=ifaamas.org/AAMAS/2027/Conference", "status": "verified", "source": "ccfddl"},
   {"id": "alt27", "name": "ALT 2027", "type": "Deadline", "area": "ML", "deadline": "2026-10-12T23:59:59-12:00", "timezone": "AoE", "location": "Leiden, Netherlands", "url": "https://algorithmiclearningtheory.org/alt2027/", "status": "verified", "source": "ccfddl"},
   {"id": "naacl27", "name": "NAACL 2027", "type": "Deadline", "area": "NLP", "deadline": "2026-10-12T23:59:59-12:00", "timezone": "AoE", "location": "San Francisco, CA, USA", "url": "https://2027.naacl.org/", "status": "verified", "source": "ccfddl (ARR submission)"},
+  {"id": "cscw27-c1", "name": "CSCW 2027 · Cycle 1", "type": "Deadline", "area": ["HAI"], "deadline": "2026-10-15T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://cscw.acm.org/", "status": "estimated", "source": "CSCW now takes rolling submissions with no fixed deadline; October reference date from community trackers"},
+  {"id": "icmi27", "name": "ICMI 2027", "type": "Deadline", "area": ["HAI"], "deadline": "2026-10-19T23:59:00-12:00", "timezone": "AoE", "location": "Mainz, Germany", "url": "https://icmi.acm.org/", "status": "estimated", "source": "estimated; ICMI 2027 moved to Mar 31 - Apr 2 2027, CFP deadline not yet published"},
+  {"id": "facct27-abs", "name": "FAccT 2027", "type": "Abstract", "area": ["HAI"], "deadline": "2026-10-27T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://facctconference.org/2027/", "status": "verified", "source": "facctconference.org (web search)"},
+  {"id": "facct27-full", "name": "FAccT 2027", "type": "Full paper", "area": ["HAI"], "deadline": "2026-11-03T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://facctconference.org/2027/", "status": "verified", "source": "facctconference.org (web search)"},
   {"id": "cvpr27-abs", "name": "CVPR 2027", "type": "Abstract", "area": "Vision", "deadline": "2026-11-10T23:59:00-12:00", "timezone": "AoE", "location": "Seattle, WA, USA", "url": "https://cvpr.thecvf.com/Conferences/2027", "status": "verified", "source": "ccfddl"},
   {"id": "cvpr27-full", "name": "CVPR 2027", "type": "Full paper", "area": "Vision", "deadline": "2026-11-16T23:59:00-12:00", "timezone": "AoE", "location": "Seattle, WA, USA", "url": "https://cvpr.thecvf.com/Conferences/2027", "status": "verified", "source": "ccfddl"},
   {"id": "l4dc27", "name": "L4DC 2027", "type": "Deadline", "area": "Robotics", "deadline": "2026-11-20T23:59:00-12:00", "timezone": "AoE", "location": "Zürich, Switzerland", "url": "https://l4dc2027.control.ee.ethz.ch/", "status": "estimated", "source": "estimated from previous editions"},
@@ -363,17 +367,28 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   {"id": "rlc27-full", "name": "RLC 2027", "type": "Full paper", "area": "RL", "deadline": "2027-03-05T23:59:00-12:00", "timezone": "AoE", "location": "Providence, RI, USA & Odense, Denmark", "url": "https://rl-conference.cc/", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "socs27", "name": "SoCS 2027", "type": "Deadline", "area": ["Planning"], "deadline": "2027-03-05T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://ojs.aaai.org/index.php/SOCS/", "status": "estimated", "source": "estimated from previous editions (typically March)"},
   {"id": "iccv27-full", "name": "ICCV 2027", "type": "Full paper", "area": "Vision", "deadline": "2027-03-07T23:59:00-08:00", "timezone": "PT", "location": "TBA", "url": "https://iccv.thecvf.com/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "roman27", "name": "RO-MAN 2027", "type": "Deadline", "area": ["Robotics", "HAI"], "deadline": "2027-03-15T23:59:59-07:00", "timezone": "PT", "location": "Waterloo, ON, Canada", "url": "https://ro-man.org/", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "ecmlpkdd27", "name": "ECML-PKDD 2027", "type": "Deadline", "area": "ML", "deadline": "2027-03-19T23:59:00-12:00", "timezone": "AoE", "location": "Eindhoven, Netherlands", "url": "https://ecmlpkdd.org/2027/", "status": "estimated", "source": "estimated from previous editions"},
+  {"id": "uist27-abs", "name": "UIST 2027", "type": "Abstract", "area": ["HAI"], "deadline": "2027-03-23T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://uist.acm.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "uist27-full", "name": "UIST 2027", "type": "Full paper", "area": ["HAI"], "deadline": "2027-03-30T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://uist.acm.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "hhai27", "name": "HHAI 2027", "type": "Deadline", "area": ["HAI"], "deadline": "2027-04-09T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://hhai-conference.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "cscw27-c2", "name": "CSCW 2027 · Cycle 2", "type": "Deadline", "area": ["HAI"], "deadline": "2027-04-15T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://cscw.acm.org/", "status": "estimated", "source": "CSCW now takes rolling submissions with no fixed deadline; April reference date from community trackers"},
   {"id": "ecai27-abs", "name": "ECAI 2027", "type": "Abstract", "area": "AI", "deadline": "2027-04-27T23:59:59-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://ecai2027.org/", "status": "estimated", "source": "estimated from 2025 edition"},
   {"id": "ecai27-full", "name": "ECAI 2027", "type": "Full paper", "area": "AI", "deadline": "2027-05-04T23:59:59-12:00", "timezone": "AoE", "location": "Athens, Greece", "url": "https://ecai2027.org/", "status": "estimated", "source": "estimated from 2025 edition"},
+  {"id": "aies27-abs", "name": "AIES 2027", "type": "Abstract", "area": ["HAI"], "deadline": "2027-05-13T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.aies-conference.com/", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "neurips27-abs", "name": "NeurIPS 2027", "type": "Abstract", "area": "ML", "deadline": "2027-05-14T23:59:00-12:00", "timezone": "AoE", "location": "Europe (city TBA)", "url": "https://neurips.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "aies27-full", "name": "AIES 2027", "type": "Full paper", "area": ["HAI"], "deadline": "2027-05-20T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.aies-conference.com/", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "neurips27-full", "name": "NeurIPS 2027", "type": "Full paper", "area": "ML", "deadline": "2027-05-21T23:59:00-12:00", "timezone": "AoE", "location": "Europe (city TBA)", "url": "https://neurips.cc/Conferences/2027", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "emnlp27", "name": "EMNLP 2027", "type": "Deadline", "area": "NLP", "deadline": "2027-05-24T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://2027.emnlp.org/", "status": "estimated", "source": "estimated from 2026 edition (ARR submission)"},
   {"id": "corl27-abs", "name": "CoRL 2027", "type": "Abstract", "area": "Robotics", "deadline": "2027-05-24T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.corl.org/", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "corl27-full", "name": "CoRL 2027", "type": "Full paper", "area": "Robotics", "deadline": "2027-05-27T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://www.corl.org/", "status": "estimated", "source": "estimated from 2026 edition"},
+  {"id": "hai27", "name": "HAI 2027", "type": "Deadline", "area": ["HAI"], "deadline": "2027-06-25T23:59:00-12:00", "timezone": "AoE", "location": "TBA", "url": "https://hai-conference.net/", "status": "estimated", "source": "estimated from previous editions (full papers usually close in June/July)"},
   {"id": "aaai28-abs", "name": "AAAI 2028", "type": "Abstract", "area": "AI", "deadline": "2027-07-20T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://aaai.org/conference/aaai/", "status": "estimated", "source": "estimated from 2027 edition"},
   {"id": "humanoids27", "name": "Humanoids 2027", "type": "Deadline", "area": "Robotics", "deadline": "2027-07-23T23:59:00-07:00", "timezone": "PT", "location": "TBA", "url": "https://www.ieee-ras.org/conferences-workshops/fully-sponsored/humanoids", "status": "estimated", "source": "estimated from 2026 edition"},
   {"id": "aaai28-full", "name": "AAAI 2028", "type": "Full paper", "area": "AI", "deadline": "2027-07-27T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://aaai.org/conference/aaai/", "status": "estimated", "source": "estimated from 2027 edition"},
+  {"id": "iui28-abs", "name": "IUI 2028", "type": "Abstract", "area": ["HAI"], "deadline": "2027-08-12T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://iui.acm.org/", "status": "estimated", "source": "estimated from 2027 edition (IUI 2027 closed 2026-08-20)"},
+  {"id": "iui28-full", "name": "IUI 2028", "type": "Full paper", "area": ["HAI"], "deadline": "2027-08-19T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://iui.acm.org/", "status": "estimated", "source": "estimated from 2027 edition (IUI 2027 closed 2026-08-20)"},
+  {"id": "chi28", "name": "CHI 2028", "type": "Full paper", "area": ["HAI"], "deadline": "2027-09-09T23:59:59-12:00", "timezone": "AoE", "location": "TBA", "url": "https://chi2028.acm.org/", "status": "estimated", "source": "estimated from 2027 edition (CHI 2027 closed 2026-09-10)"},
   {"id": "icra28", "name": "ICRA 2028", "type": "Deadline", "area": "Robotics", "deadline": "2027-09-15T23:59:59-07:00", "timezone": "PT", "location": "TBA", "url": "https://www.ieee-ras.org/conferences-workshops/fully-sponsored/icra", "status": "estimated", "source": "estimated from 2027 edition"}
 ]
 </script>
@@ -417,7 +432,8 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   sel.value = String(N);
 
   /* ---- area tags (OR filter; none selected = all areas) ---- */
-  var AREAS = ['RL','Robotics','ML','AI','Planning','Vision','NLP'].filter(function(a){ return DATA.some(function(d){ return d.areas.includes(a); }); });
+  var AREA_TITLES = { RL: 'Reinforcement learning', Robotics: 'Robotics', ML: 'Machine learning', AI: 'Artificial intelligence', Planning: 'Planning and scheduling', Vision: 'Computer vision', NLP: 'Natural language processing', HAI: 'Human-AI interaction' };
+  var AREAS = ['RL','Robotics','ML','AI','Planning','Vision','NLP','HAI'].filter(function(a){ return DATA.some(function(d){ return d.areas.includes(a); }); });
   function matches(d){ return !tags.size || d.areas.some(function(a){ return tags.has(a); }); }
   function readTags(){
     var m = /(?:^|[#&])tags=([^&]*)/.exec(location.hash);
@@ -437,7 +453,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
   var tagsHint = document.getElementById('tags-hint');
   var tagBtns = AREAS.map(function(a){
     var b = document.createElement('button');
-    b.type = 'button'; b.className = 'tag'; b.dataset.area = a; b.textContent = a;
+    b.type = 'button'; b.className = 'tag'; b.dataset.area = a; b.textContent = a; b.title = AREA_TITLES[a] || a;
     b.setAttribute('aria-pressed', 'false');
     b.addEventListener('click', function(){ if (tags.has(a)) tags.delete(a); else tags.add(a); writeState(); renderTags(); tick(true); });
     tagsBox.appendChild(b);
@@ -533,7 +549,7 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     var kind = d.type === 'Deadline' ? 'Paper deadline' : d.type;
     el.innerHTML =
       '<div class="meta">' +
-        d.areas.map(function(a){ return '<span class="pill" data-area="' + esc(a) + '">' + esc(a) + '</span>'; }).join('') +
+        d.areas.map(function(a){ return '<span class="pill" data-area="' + esc(a) + '" title="' + esc(AREA_TITLES[a] || a) + '">' + esc(a) + '</span>'; }).join('') +
         (d.status === 'estimated' ? '<span class="est" title="' + esc(d.source) + '">estimated</span>' : '') +
         '<a class="home" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open ' + esc(d.name) + ' homepage" title="' + esc(d.name) + ' homepage">' + LINK_SVG + '</a>' +
       '</div>' +
