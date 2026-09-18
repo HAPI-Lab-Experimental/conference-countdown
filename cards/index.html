@@ -514,7 +514,8 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     // vertical: on short cards step the numerals down until the card's content fits its box
     el.style.removeProperty('--vfit');
     var v = 1;
-    while (el.scrollHeight > el.clientHeight + 1 && v > 0.45) { v -= 0.1; el.style.setProperty('--vfit', v.toFixed(2)); }
+    var over = function(){ return el.scrollHeight > el.clientHeight + 1 || c.scrollHeight > c.clientHeight + 1; };
+    while (over() && v > 0.45) { v -= 0.1; el.style.setProperty('--vfit', v.toFixed(2)); }
   }
   function refit(){
     Array.prototype.forEach.call(row.children, function(c){ if (c.classList.contains('card') && !c.classList.contains('leaving')) fit(c); });
