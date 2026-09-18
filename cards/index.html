@@ -654,7 +654,9 @@ footer kbd{font:inherit; font-size:11px; border:1px solid var(--rule-strong); bo
     var q = QUOTES[i], animate = !!arguments[2] && !reduce.matches;
     clearTimeout(qRevealTimer);
     var built = buildSpans(q);
-    qFig.className = 'quote face-' + q.f + (animate ? ' reveal' : '');
+    // swap the face class without touching the narrow/nofit flags the ResizeObserver and fit logic manage
+    Array.prototype.slice.call(qFig.classList).forEach(function(cl){ if (cl.indexOf('face-') === 0) qFig.classList.remove(cl); });
+    qFig.classList.add('face-' + q.f); qFig.classList.toggle('reveal', animate);
     qText.innerHTML = built.html; qWho.textContent = q.w;
     if (animate) qRevealTimer = setTimeout(function(){ qFig.classList.remove('reveal'); }, built.total + 150);
     qFig.classList.remove('nofit');
